@@ -3,6 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe 'YAML spec' do
+  before do
+    @yaml_with_class = I18n::Tasks::Scanners::Files::FileReader.new.read_file('spec/fixtures/en-with-class.yml')
+  end
+
   describe 'emoji retention' do
     let(:yaml) do
       {
@@ -104,6 +108,19 @@ RSpec.describe 'YAML spec' do
 
       dumped = I18n::Tasks::Data::Adapter::YamlAdapter.dump(parsed, {})
       expect(dumped).to eq(expected)
+    end
+  end
+
+  describe 'permitted classes' do
+    it 'exception on class not permitted' do
+      base_task = I18n::Tasks::BaseTask.new
+      expect { base_task.data.adapter_parse(@yaml_with_class, :yaml) }.to(
+        raise_error(I18n::Tasks::CommandError)
+      )
+    end
+    it 'once class is permitted, parsing succeeds' do
+      base_task = I18n::Tasks::BaseTask.new(config_file: 'spec/fixtures/config/i18n-tasks-permitted_classes.yml')
+      expect { base_task.data.adapter_parse(@yaml_with_class, :yaml) }.not_to raise_error
     end
   end
 end

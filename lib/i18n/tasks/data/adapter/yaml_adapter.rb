@@ -12,7 +12,8 @@ module I18n::Tasks
           # @return [Hash] locale tree
           def parse(str, options)
             if YAML.method(:load).arity.abs == 2
-              YAML.safe_load(str, **(options || {}), permitted_classes: [Symbol], aliases: true)
+              permitted_classes = (options || {}).delete(:permitted_classes) { [Symbol] }
+              YAML.safe_load(str, **(options || {}), permitted_classes: permitted_classes, aliases: true)
             else
               # older jruby and rbx 2.2.7 do not accept options
               YAML.load(str)
